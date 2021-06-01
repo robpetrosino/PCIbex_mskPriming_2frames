@@ -172,7 +172,7 @@ Template( "items.csv" ,
                 .remove()
                 ,
                 newButton("q_button", "Resume the experiment.")
-                .print()
+                .center().print()
                 //.after( getText("warning") )
                 .wait(
                     getHtml("q1").test.complete()
@@ -202,7 +202,7 @@ Template( "items.csv" ,
                 .remove()
                 ,
                 newButton("q_button", "Resume the experiment.")
-                .print()
+                .center().print()
                 //.after( getText("warning") )
                 .wait(
                     getHtml("q2").test.complete()
