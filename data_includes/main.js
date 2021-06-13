@@ -295,3 +295,5 @@ newTrial("exit",
 ).setOption("hideProgressBar", true)
 
 SendResults("send")
+
+DebugOff()
