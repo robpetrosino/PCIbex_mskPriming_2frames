@@ -11,7 +11,7 @@ newTrial( "consent" ,
         .log()
         .print()
     ,
-    newText("warning", "Please type fill out all items above to continue.")
+    newText("warning", "Please type an answer in the box to continue.")
         .color("red")
         .italic()
         //.css('position','absolute')
@@ -36,7 +36,6 @@ newTrial("instructions" ,
 )
 .setOption("hideProgressBar", true)
 
-
 // WARM-UP
 Template( "warmup.csv" ,
     row => newTrial( "warmup" ,
@@ -45,7 +44,6 @@ Template( "warmup.csv" ,
         // Automatically start and wait for Timer elements when created, and log those events
        defaultTimer.log().start().wait()
        ,
-       // count the number of trials and show question and break screens after n trials
        newVar("warmup_nTrial", 0)
        .global()
        .set(v=>v+1)
@@ -53,10 +51,11 @@ Template( "warmup.csv" ,
         .success(
             newHtml("question_warmup", "question_warmup.html")
             //.cssContainer({"width":"720px"})
-            .print()
+            .settings.center()
+            .print("center at 50vw","middle at 50vh")
             .log()
             ,
-            newText("wp_warning", "Please type an answer to continue.")
+            newText("warning", "Please type an answer to continue.")
             .color("red")
             .italic()
             .cssContainer({
@@ -70,14 +69,14 @@ Template( "warmup.csv" ,
             .bold()
             .remove()
             ,
-            newButton("qw_button", "Next")
+            newButton("qw_button", "Resume the experiment.")
             .center()
-            .print()
+            .print("center at 50vw","middle at 75vh")
             //.after( getText("warning") )
             .wait(
                 getHtml("question_warmup").test.complete()
-                    .failure( getText("wp_warning")
-                                .print() )
+                    .failure( getText("warning")
+                                .print("center at 50vw", "middle at 80vh") )
                 )
         )
        ,
@@ -115,7 +114,7 @@ Template( "warmup.csv" ,
        newText("target",row.target),
        newKey("answerTarget", "fj").log().wait(),
        getText("target").remove()
-       )
+    )
 .setOption("hideProgressBar", true)
 // Logging participant's group
 .log("group", row.group)
@@ -135,7 +134,6 @@ newTrial("ready", //this trial routine and the next one needs to appear in the m
     newHtml("ready", "ready.html")
         //.cssContainer({"width":"720px"})
         .print("center at 50vw","middle at 50vh")
-        .log()
     ,
     newKey("J").wait()
 )
@@ -144,17 +142,15 @@ newTrial("ready", //this trial routine and the next one needs to appear in the m
 // Executing experiment from the csv table, where participants may or may not be divided into two groups
 Template( "items.csv" ,
     row => newTrial( "experiment" ,
+       defaultText.center().print("center at 50vw","middle at 50vh").log()
+       ,
        // Automatically start and wait for Timer elements when created, and log those events
        defaultTimer.log().start().wait()
        ,
-      // count the number of trials and show question and break screens after n trials decrementally
-       newVar("nRemainingTrials", 320).global().set(v=> v-1)
-       ,
-        // count the number of trials and show question and break screens after n trials incrementally
-       newVar("nTrial", 0)
+       newVar("nTrial",0)
        .global()
        .set(v=>v+1)
-       .test.is(v=> v===80) // the first question appears after 80 items (2 breaks)
+       .test.is(v=>v===80) // the first question appears after 80 items (2 breaks)
         .success(
             newHtml("q1", "question1.html")
                 //.cssContainer({"width":"720px"})
@@ -175,27 +171,28 @@ Template( "items.csv" ,
                 .bold()
                 .remove()
                 ,
-                newButton("q1_button", "Resume the experiment.")
+                newButton("q_button", "Resume the experiment.")
                 .center().print()
+                //.after( getText("warning") )
                 .wait(
                     getHtml("q1").test.complete()
                         .failure( getText("warning")
                                     .print() )
                 )
         ), clear(), //clear screen
-        getVar('nTrial').test.is(v=> v===200) // the second question appears after 200 items (5 breaks)
+        getVar('nTrial').test.is(v=>v===200) // the second question appears after 200 items (5 breaks)
         .success(
             newHtml("q2", "question2.html")
                 //.cssContainer({"width":"720px"})
                 .print()
                 .log()
                 ,
-                newText("warning2", "Please type an answer to continue.")
+                newText("warning", "Please type an answer to continue.")
                 .color("red")
                 .italic()
                 .cssContainer({
                     "margin-top": "7px",
-                    position: "relative",
+                    position: "absolute",
                     left: "unset",
                     top: "unset",
                     height: 0,
@@ -204,35 +201,22 @@ Template( "items.csv" ,
                 .bold()
                 .remove()
                 ,
-                newButton("q2_button", "Resume the experiment.")
+                newButton("q_button", "Resume the experiment.")
                 .center().print()
                 //.after( getText("warning") )
                 .wait(
                     getHtml("q2").test.complete()
-                        .failure( getText("warning2")
+                        .failure( getText("warning")
                                     .print() )
                 )
         ), clear(), // clear screen
-        getVar("nTrial").test.is(v=> v>0 && v<320 && v%40===0) // the break screen appears after every 40 items (but not at the end of the experiment)
+        getVar("nTrial").test.is(v=>v>0&&v%40===0) // the break screen appears after 40 items
         .success(
-            newText("remainingTrials", "Number of words left: ")
-                .css({height:0, 'line-height':0, 'font-size': 22, 'font-style': 'italic', 'margin-left': '5em'})
-                .after(newText()
-                          .text( getVar("nRemainingTrials"))
-                            .css({'font-size': 22, 'font-style': 'italic'})
-                            .after(newText('totTrials', "/320")
-                                    .css({'font-size': 22, 'font-style': 'italic'})
-                                  )
-                        )
-            ,
             newHtml("break", "break.html")
                 //.cssContainer({"width":"720px"})
                 .print("center at 50vw","middle at 50vh")
-                .after(getText("remainingTrials"))
-            ,
-            newKey("J").wait()
-            ,
-            newVar("breakTime").set(v=>Date.now()).log()
+                ,
+                newKey("J").wait()
             )
        ,
        clear() // clear screen
@@ -285,10 +269,7 @@ Template( "items.csv" ,
 .log("Target", row.target)
 )
 
-
 newTrial("exit",
-    exitFullscreen() // switch back to non-fullscreen mode
-    ,
     newHtml("exit", "exit.html")
         .print()
         .log()
@@ -301,7 +282,7 @@ newTrial("exit",
             .bold()
             .hidden()
     ,
-    newButton("exit_button", "Finish the experiment.")
+    newButton("exit_button", "Submit your results.")
             .center()
             .print()
             .wait(
@@ -309,10 +290,8 @@ newTrial("exit",
                     .failure( getText("warning_end")
                                 .print()
                                 .visible()
-                            )
+                             )
                 )
 ).setOption("hideProgressBar", true)
 
 SendResults("send")
-
-DebugOff() // turn the debugger tool off
